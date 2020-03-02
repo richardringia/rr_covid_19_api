@@ -34,7 +34,7 @@ class VirusDataController extends Controller
                 'total_confirmed' => $totalConfirmed->count,
                 'total_deaths' => $totalDeaths->count,
                 'total_recovered' => $totalRecovered->count,
-                'country' =>  ($location->name !== 'undefined' ? $location->name . ', ' : '') . ltrim($location->country()->name)// TODO: ADD LTRIM TO IMPORT
+                'country' =>  ($location->name !== 'undefined' ? ltrim($location->name) . ', ' : '') . ltrim($location->country()->name)// TODO: ADD LTRIM TO IMPORT
             ];
         });
     }
