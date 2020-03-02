@@ -36,8 +36,6 @@ class VirusDataController extends Controller
                 'total_recovered' => $totalRecovered->count,
                 'country' =>  ($location->name !== 'undefined' ? $location->name . ', ' : '') . ltrim($location->country()->name)// TODO: ADD LTRIM TO IMPORT
             ];
-        })->sortBy('total_confirmed')->reverse()->filter(function ($location) {
-            return $location['total_confirmed'] > 0 || $location['total_deaths'] > 0 || $location['total_recovered'] > 0;
         });
     }
 }
