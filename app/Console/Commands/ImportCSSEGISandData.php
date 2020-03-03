@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\VirusDataStatus;
+use App\Models\VirusDataUpdate;
 use App\Repositories\CountryRepositoryInterface;
 use App\Repositories\StateRepositoryInterface;
 use App\Repositories\VirusDataRepositoryInterface;
@@ -78,6 +79,9 @@ class ImportCSSEGISandData extends Command
     {
         $virusDataStatuses = VirusDataStatus::all();
 
+        $new = 0;
+        $changes =0;
+
         foreach ($virusDataStatuses as $virusDataStatus) {
             if ($virusDataStatus->url != null) {
                 $csvData = file_get_contents($virusDataStatus->url);
@@ -114,6 +118,7 @@ class ImportCSSEGISandData extends Command
                                     'status' => $virusDataStatus->id,
                                     'count' => $count
                                 ]);
+                                $new++;
                             }
 
                         }
@@ -124,6 +129,12 @@ class ImportCSSEGISandData extends Command
             }
         }
 
+        VirusDataUpdate::create([
+            'virus_data_type' => 'COVID-19',
+            'date' => new Carbon('now'),
+            'new' => $new,
+            'changes' => $changes // TODO CHECK FOR CHANGES
+        ]);
         $this->line('Corona imported!');
     }
 }
