@@ -20,12 +20,14 @@ class VirusDataRepository implements VirusDataRepositoryInterface
             'count' => 'required'
         ];
 
+        if ($data['count'] === "") $data['count'] = 0;
+
         // Create a validator
         $validator = Validator::make($data, $rules);
 
         // Check if it fails, if it fail throw an exception with the errors
         if ($validator->fails()) {
-            throw new Exception($validator->errors(), 401);
+            throw new \Exception($validator->errors(), 401);
         }
 
 
