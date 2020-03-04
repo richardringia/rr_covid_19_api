@@ -102,12 +102,14 @@ class ImportCSSEGISandData extends Command
                     } else {
                         if (count($dates) > 0) {
                             $skipRows = 0;
-                            if (!is_numeric($row[2])) {
+                            $stateName = $row[0] == "" ? "undefined" : $row[0];
+                            if (count($row) == 47) {
                                 $skipRows = 1;
+                                $stateName = $stateName == "undefined" ? $stateName : $stateName . ', ' . $row[1];
                             }
 
-                            $country = $this->countryRepository->store($row[1]);
-                            $state = $this->stateRepository->store($row[0] == "" ? "undefined" : $row[0], $country->id, $row[2 + $skipRows], $row[3  + $skipRows]);
+                            $country = $this->countryRepository->store($row[1 + $skipRows]);
+                            $state = $this->stateRepository->store($stateName, $country->id, $row[2 + $skipRows], $row[3  + $skipRows]);
 
                             foreach ($dates as $key => $date) {
                                 $count = $row[$key + 4 + $skipRows];
