@@ -23,4 +23,5 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 Route::group(['middleware' => ['api_token'], 'prefix' => 'virus'], function () {
     Route::get('all', 'Api\VirusDataController@all');
+    Route::get('allbycountry', 'Api\VirusDataController@allByCountry');
 });
