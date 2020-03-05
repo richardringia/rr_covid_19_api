@@ -60,9 +60,9 @@ class VirusDataController extends Controller
                     'latitude' => $location->lat,
                     'longitude' => $location->lng
                 ],
-                'total_confirmed' => $totalConfirmed->count,
-                'total_deaths' => $totalDeaths->count,
-                'total_recovered' => $totalRecovered->count,
+                'total_confirmed' => $totalConfirmed != null ? $totalConfirmed->count : 0, // TODO FIX ID 1
+                'total_deaths' => $totalDeaths != null ? $totalDeaths->count : 0,
+                'total_recovered' => $totalRecovered != null ? $totalRecovered->count : 0,
                 'country' => ($location->name !== 'undefined' ? ltrim($location->name) . ', ' : '') . ltrim($location->country()->name())// TODO: ADD LTRIM TO IMPORT
             ];
         });
@@ -93,9 +93,9 @@ class VirusDataController extends Controller
                 $totalConfirmed = VirusData::where('state', $state->id)->where('status', 'CONFIRMED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
                 $totalDeaths = VirusData::where('state', $state->id)->where('status', 'DEATHS')->where('type', $type->id)->orderBy('date', 'DESC')->first();
                 $totalRecovered = VirusData::where('state', $state->id)->where('status', 'RECOVERED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-                $totalConfirmedCount += $totalConfirmed->count;
-                $totalDeathsCount += $totalDeaths->count;
-                $totalRecoveredCount += $totalRecovered->count;
+                $totalConfirmedCount += $totalConfirmed ? $totalConfirmed->count : 0;
+                $totalDeathsCount += $totalDeaths ? $totalDeaths->count : 0;
+                $totalRecoveredCount += $totalRecovered ? $totalRecovered->count : 0;
             }
             return [
                 'country' => $country,
