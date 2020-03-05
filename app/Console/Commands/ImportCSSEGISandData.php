@@ -89,6 +89,17 @@ class ImportCSSEGISandData extends Command
                 $csvLines = str_getcsv($csvData, "\n");
                 $counter = 0;
                 $dates = [];
+
+                $highestNumber = 0;
+//                $lowestNumber = 8000;
+
+                foreach ($csvLines as $row) {
+                    $row = str_getcsv($row, $csvDelimiter);
+                    $highestNumber = count($row) > $highestNumber ? count($row) : $highestNumber;
+//                    $lowestNumber = count($row) < $lowestNumber ? count($row) : $lowestNumber;
+                }
+
+
                 foreach ($csvLines as $row) {
                     $row = str_getcsv($row, $csvDelimiter);
                     if ($counter == 0) {
@@ -103,7 +114,7 @@ class ImportCSSEGISandData extends Command
                         if (count($dates) > 0) {
                             $skipRows = 0;
                             $stateName = $row[0] == "" ? "undefined" : $row[0];
-                            if (count($row) == 47) {
+                            if (count($row) == $highestNumber) {
                                 $skipRows = 1;
                                 $stateName = $stateName == "undefined" ? $stateName : $stateName . ', ' . $row[1];
                             }
