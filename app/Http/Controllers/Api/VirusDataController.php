@@ -96,9 +96,29 @@ class VirusDataController extends Controller
                 $totalConfirmedCount += $totalConfirmed ? $totalConfirmed->count : 0;
                 $totalDeathsCount += $totalDeaths ? $totalDeaths->count : 0;
                 $totalRecoveredCount += $totalRecovered ? $totalRecovered->count : 0;
+
+
             }
+            $states = $country->states->map(function($state) use ($type) {
+                $totalConfirmed = VirusData::where('state', $state->id)->where('status', 'CONFIRMED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
+                $totalDeaths = VirusData::where('state', $state->id)->where('status', 'DEATHS')->where('type', $type->id)->orderBy('date', 'DESC')->first();
+                $totalRecovered = VirusData::where('state', $state->id)->where('status', 'RECOVERED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
+                return [
+                    'id' => $state->name,
+                    'state' => $state,
+                    'location' => [
+                        'latitude' => $state->lat,
+                        'longitude' => $state->lng
+                    ],
+                    'total_confirmed' => $totalConfirmed->count,
+                    'total_deaths' =>$totalDeaths->count,
+                    'total_recovered' =>  $totalRecovered->count,
+                ];
+            });
+            unset($country->states);
             return [
                 'country' => $country,
+                'states' => $states,
                 'total_confirmed' => $totalConfirmedCount,
                 'total_deaths' => $totalDeathsCount,
                 'total_recovered' => $totalRecoveredCount,

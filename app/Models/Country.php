@@ -12,7 +12,7 @@ class Country extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'id', 'name', 'custom_name'
+        'id', 'name', 'custom_name', 'lat', 'lng', 'latDelta', 'lngDelta'
     ];
 
     public function states() {
