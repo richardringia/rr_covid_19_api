@@ -3,12 +3,28 @@
 
 namespace App\Repositories;
 
+use App\Models\Country;
 use App\Models\State;
 use App\Models\VirusData;
 use Validator;
 
 class VirusDataRepository implements VirusDataRepositoryInterface
 {
+    /**
+     * The repository of managing types of virus data
+     *
+     * @var VirusDataTypeRepositoryInterface
+     */
+    private $virusDataTypeRepository;
+
+    /**
+     * VirusDataRepository constructor.
+     * @param VirusDataTypeRepositoryInterface $virusDataTypeRepository
+     */
+    public function __construct(VirusDataTypeRepositoryInterface $virusDataTypeRepository)
+    {
+        $this->virusDataTypeRepository = $virusDataTypeRepository;
+    }
 
     public function store($data)
     {
@@ -39,5 +55,20 @@ class VirusDataRepository implements VirusDataRepositoryInterface
         } else {
             return VirusData::create($data);
         }
+    }
+
+    public function getLatestCountryCount($country, $typeId, $statusId)
+    {
+        $counter = 0;
+        foreach ($country->states as $state) {
+            $counter += $this->getLatestStateCount($state, $typeId, $statusId);
+        }
+        return $counter;
+    }
+
+    public function getLatestStateCount($state, $typeId, $statusId)
+    {
+        $virusData = VirusData::where('state', $state->id)->where('status', $statusId)->where('type', $typeId)->orderBy('date', 'DESC')->firstOrFail();
+        return $virusData->count;
     }
 }
