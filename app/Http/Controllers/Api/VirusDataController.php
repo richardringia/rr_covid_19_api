@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\State;
-use App\Models\VirusData;
 use App\Models\VirusDataType;
 use App\Models\VirusDataUpdate;
 use Carbon\Carbon;
@@ -49,20 +48,16 @@ class VirusDataController extends Controller
 
         $locations = State::all();
 
-        $data = $locations->map(function ($location) use ($type) {
-            $totalConfirmed = VirusData::where('state', $location->id)->where('status', 'CONFIRMED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-            $totalDeaths = VirusData::where('state', $location->id)->where('status', 'DEATHS')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-            $totalRecovered = VirusData::where('state', $location->id)->where('status', 'RECOVERED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-
+        $data = $locations->map(function (State $location) use ($type) {
             return [
                 'id' => 'pin' . $location->id,
                 'location' => [
                     'latitude' => $location->lat,
                     'longitude' => $location->lng
                 ],
-                'total_confirmed' => $totalConfirmed != null ? $totalConfirmed->count : 0, // TODO FIX ID 1
-                'total_deaths' => $totalDeaths != null ? $totalDeaths->count : 0,
-                'total_recovered' => $totalRecovered != null ? $totalRecovered->count : 0,
+                'total_confirmed' =>  $location->totalConfirmed($type->id),
+                'total_deaths' => $location->totalDeaths($type->id),
+                'total_recovered' => $location->totalRecovered($type->id),
                 'country' => ($location->name !== 'undefined' ? ltrim($location->name) . ', ' : '') . ltrim($location->country()->name())// TODO: ADD LTRIM TO IMPORT
             ];
         });
@@ -82,26 +77,31 @@ class VirusDataController extends Controller
 
         $type = VirusDataType::where('id', 'COVID-19')->first();
 
+
         $countries = Country::all();
 
-        $data = $countries->map(function ($country) use ($type) {
+        $data = $countries->map(function (Country $country) use ($type) {
             $country->name = $country->name();
-            $totalConfirmedCount = 0;
-            $totalDeathsCount = 0;
-            $totalRecoveredCount = 0;
-            foreach ($country->states as $state) {
-                $totalConfirmed = VirusData::where('state', $state->id)->where('status', 'CONFIRMED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-                $totalDeaths = VirusData::where('state', $state->id)->where('status', 'DEATHS')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-                $totalRecovered = VirusData::where('state', $state->id)->where('status', 'RECOVERED')->where('type', $type->id)->orderBy('date', 'DESC')->first();
-                $totalConfirmedCount += $totalConfirmed ? $totalConfirmed->count : 0;
-                $totalDeathsCount += $totalDeaths ? $totalDeaths->count : 0;
-                $totalRecoveredCount += $totalRecovered ? $totalRecovered->count : 0;
-            }
+            $states = $country->states->map(function (State $state) use ($type) {
+                return [
+                    'id' => $state->name,
+                    'state' => $state,
+                    'location' => [
+                        'latitude' => $state->lat,
+                        'longitude' => $state->lng
+                    ],
+                    'total_confirmed' => $state->totalConfirmed($type->id),
+                    'total_deaths' => $state->totalDeaths($type->id),
+                    'total_recovered' => $state->totalRecovered($type->id),
+                ];
+            });
+            unset($country->states);
             return [
                 'country' => $country,
-                'total_confirmed' => $totalConfirmedCount,
-                'total_deaths' => $totalDeathsCount,
-                'total_recovered' => $totalRecoveredCount,
+                'states' => $states,
+                'total_confirmed' => $country->totalConfirmed($type->id),
+                'total_deaths' => $country->totalDeaths($type->id),
+                'total_recovered' => $country->totalRecovered($type->id),
             ];
         });
 

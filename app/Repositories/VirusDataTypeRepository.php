@@ -11,4 +11,9 @@ class VirusDataTypeRepository implements VirusDataTypeRepositoryInterface
     {
         // TODO: Implement store() method.
     }
+
+    public function getById($id)
+    {
+        // TODO: Implement getById() method.
+    }
 }
