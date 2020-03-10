@@ -55,7 +55,7 @@ class VirusDataController extends Controller
                     'latitude' => $location->lat,
                     'longitude' => $location->lng
                 ],
-                'total_confirmed' =>  $location->totalConfirmed($type->id),
+                'total_confirmed' => $location->totalConfirmed($type->id),
                 'total_deaths' => $location->totalDeaths($type->id),
                 'total_recovered' => $location->totalRecovered($type->id),
                 'country' => ($location->name !== 'undefined' ? ltrim($location->name) . ', ' : '') . ltrim($location->country()->name())// TODO: ADD LTRIM TO IMPORT
@@ -106,5 +106,36 @@ class VirusDataController extends Controller
         });
 
         return response()->json(['updated' => true, 'countries' => $data], 200);
+    }
+
+    public function data(Request $request)
+    {
+        try {
+            $update = $this->checkForUpdate($request);
+            if ($update)
+                return $update;
+        } catch (\Exception $e) {
+            throw new \Exception("Date error", 400);
+        }
+
+        $type = VirusDataType::where('id', 'COVID-19')->first();
+
+        $counties = Country::all();
+
+        $data = $counties->map(function (Country $country) use ($type) {
+           $country->name = $country->name();
+           $country->states->map(function (State $state) use ($type) {
+               $state->total_confirmed = $state->totalConfirmed($type->id);
+               $state->total_deaths = $state->totalDeaths($type->id);
+               $state->total_recovered = $state->totalRecovered($type->id);
+               return $state;
+           });
+           $country->total_confirmed = $country->totalConfirmed($type->id);
+           $country->total_deaths = $country->totalDeaths($type->id);
+           $country->total_recovered = $country->totalRecovered($type->id);
+           return $country;
+        });
+
+        return response()->json(['updated' => true, 'data' => $data], 200);
     }
 }
