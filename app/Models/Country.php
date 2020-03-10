@@ -23,13 +23,13 @@ class Country extends Model
 
     /**
      * Country constructor.
+     * @param array $attributes
      */
-    public function __construct()
+    public function __construct(array $attributes = [])
     {
-        parent::__construct();
+        parent::__construct($attributes);
         $this->virusDataRepository = new VirusDataRepository(new VirusDataTypeRepository());
     }
-
 
     protected $fillable = [
         'id', 'name', 'custom_name', 'lat', 'lng', 'latDelta', 'lngDelta'
